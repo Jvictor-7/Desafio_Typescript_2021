@@ -1,4 +1,4 @@
-type BuiltInTag = "home" | "work";
+type BuiltInTag = "home" | "work" | "school";
 
 type TodoTag = BuiltInTag | { custom: string };
 
@@ -17,6 +17,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const updateStateEvent = new CustomEvent("updateState", {});
 // Exemplo de generics
+          //class MakeState<S> {
+            //state: S;
+            //constructor(initalState: S){
+                //this.state = initialState
+            //}
+            //class getState {
+
+            //}
+            //class setState<S> {
+
+            //}
+            //get = new getState()
+
+            //set = new setState
+              
+          //}
 function makeState<S>(initialState: S) {
   let state: S;
   function getState() {
@@ -33,7 +49,7 @@ function makeState<S>(initialState: S) {
 // Application
 function TodoApp(listElement: HTMLDivElement) {
   const { getState, setState } = makeState<Todo[]>([]);
-  const dataSet: Set<BuiltInTag> = new Set(["home", "work"]);
+  const dataSet: Set<BuiltInTag> = new Set(["home", "work", "school"]);
   let nextId = 0;
 
   listElement.innerHTML = `
@@ -126,7 +142,10 @@ function TodoApp(listElement: HTMLDivElement) {
   }
 
   function toggleTodo(todo: Todo): Todo {
-    
+    return {
+      ...todo,
+      done: !todo.done
+    }
   }
 
   function createTodo(text: string, rawTag: string = ""): Todo {
@@ -139,7 +158,7 @@ function TodoApp(listElement: HTMLDivElement) {
   }
 
   function getTodoTag(tag: string): TodoTag {
-    return tag === "home" || tag === "work" ? tag : { custom: tag };
+    return tag === "home" || tag === "work" || tag === "school" ? tag : { custom: tag };
   }
 
   function createTodoTagTuple(tag: TodoTag): [HTMLElement, HTMLSpanElement] {
@@ -154,6 +173,9 @@ function TodoApp(listElement: HTMLDivElement) {
     } else if (tag === "work") {
       icon.classList.add("bi-briefcase");
       label.textContent = "Work";
+    } else if (tag === "school") {
+      icon.classList.add("bi-mortarboard");
+      label.textContent = "School";
     } else {
       icon.classList.add("bi-pin");
       label.textContent = tag.custom;
@@ -163,11 +185,14 @@ function TodoApp(listElement: HTMLDivElement) {
   }
 
   function completeAll(todos: Todo[]): Array<Todo & { done: true }> {
-    
+    return todos.map((el) => ({
+      ...el,
+      done: true,
+    }));
   }
 
   function getTotalDone(todos: Todo[]): number {
-    
+    return todos.reduce((acc,red) => acc + Number(red.done), 0)
   }
 
   function render() {
@@ -181,7 +206,7 @@ function TodoApp(listElement: HTMLDivElement) {
     spanElement.innerText = `${total} Done`;
 
     const todoDivs = todos.map(todoDivElement);
-    todoDivs.forEach((el) => ulElement.appendChild(el));
+    todoDivs.forEach((todo) => ulElement.appendChild(todo));
   }
 
   document.addEventListener("updateState", (_) => {
